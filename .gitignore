@@ -198,3 +198,6 @@ venv.bak/
 # mdbook docs
 public/
 b
+
+# Doom Screenshots
+*.pcx
