@@ -18,8 +18,9 @@ import (
 	"context"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-
 	_ "github.com/docker/docker/reference"
+	"hash/fnv"
+	"math"
 )
 
 func getDockerClient() (*client.Client, error) {
@@ -31,4 +32,22 @@ func getContainers(client *client.Client) ([]types.Container, error) {
 	return client.ContainerList(ctx, types.ContainerListOptions{
 		All: true,
 	})
+}
+
+func mapStringToInt(s string) (int32, error) {
+
+	var algorithm = fnv.New32a()
+	_, err := algorithm.Write([]byte(s))
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(algorithm.Sum32() % math.MaxInt32), nil
+}
+
+func firstOrEmpty(sa []string) string {
+	if len(sa) < 1 {
+		return ""
+	}
+	return sa[0]
 }

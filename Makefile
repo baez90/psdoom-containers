@@ -19,6 +19,9 @@ clean-all: clean clean-vendor
 
 rebuild: clean format compile
 
+install:
+	@cp -f $(DIR)/$(BINARY_NAME) $(GOPATH)/bin/
+
 format:
 	@go fmt $(PKGS)
 

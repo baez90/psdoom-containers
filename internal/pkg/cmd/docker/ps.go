@@ -17,7 +17,6 @@ package docker
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"hash/fnv"
 	"os/user"
 )
 
@@ -78,20 +77,4 @@ func printPsDoomCompatible(containerId, containerName string) {
 
 }
 
-func mapStringToInt(s string) (uint32, error) {
 
-	var algorithm = fnv.New32a()
-	_, err := algorithm.Write([]byte(s))
-	if err != nil {
-		return 0, err
-	}
-
-	return algorithm.Sum32(), nil
-}
-
-func firstOrEmpty(sa []string) string {
-	if len(sa) < 1 {
-		return ""
-	}
-	return sa[0]
-}
