@@ -12,31 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package docker
+package k8s
 
 import (
-	"context"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	_ "github.com/docker/docker/reference"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"os"
 )
 
-func getDockerClient() (*client.Client, error) {
-	return client.NewClientWithOpts()
-}
-
-func getContainers(client *client.Client) ([]types.Container, error) {
-	ctx := context.Background()
-	return client.ContainerList(ctx, types.ContainerListOptions{
-		All: true,
-	})
-}
-
-
-
-func firstOrEmpty(sa []string) string {
-	if len(sa) < 1 {
-		return ""
+func homeDir() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
 	}
-	return sa[0]
+	return os.Getenv("USERPROFILE") // windows
+}
+
+func getKubeConfig() (*rest.Config, error) {
+	return clientcmd.BuildConfigFromFlags("", *kubeConfig)
+}
+
+func getKubeClient() (*kubernetes.Clientset, error) {
+	cfg, err := getKubeConfig()
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewForConfig(cfg)
 }

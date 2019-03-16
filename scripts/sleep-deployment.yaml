@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: alpine-sleep
+  name: alpine
+  namespace: baez
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: alpine-sleep
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: alpine-sleep
+    spec:
+      containers:
+        - args:
+            - /bin/ash
+            - -c
+            - sleep 3600
+          image: alpine:latest
+          imagePullPolicy: Always
+          name: alpine
+          resources:
+            limits:
+              cpu: 10m
+              memory: 50Mi
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

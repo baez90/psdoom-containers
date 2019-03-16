@@ -37,6 +37,9 @@ dep-update: ensure-dep
 dep-check: ensure-dep
 	@dep check
 
+dep-graph:
+	@dep status -dot | dot -T png > /tmp/dep-graph.png && feh /tmp/dep-graph.png&
+
 clean:
 	rm -f debug $(BINARY_NAME)
 

@@ -16,6 +16,7 @@ package docker
 
 import (
 	"context"
+	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/docker/docker/api/types"
 	"github.com/spf13/cobra"
 	"strconv"
@@ -41,7 +42,7 @@ to quickly create a Cobra application.`,
 		containers, err := getContainers(cli)
 
 		for _, container := range containers {
-			mappedName, err := mapStringToInt(container.ID)
+			mappedName, err := hashing.MapStringToInt(container.ID)
 			if err == nil && strconv.Itoa(int(mappedName)) == args[0] {
 				ctx := context.Background()
 				_ = cli.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{

@@ -12,31 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package docker
+package hashing
 
 import (
-	"context"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	_ "github.com/docker/docker/reference"
+	"hash/fnv"
+	"math"
 )
 
-func getDockerClient() (*client.Client, error) {
-	return client.NewClientWithOpts()
-}
+func MapStringToInt(s string) (int32, error) {
 
-func getContainers(client *client.Client) ([]types.Container, error) {
-	ctx := context.Background()
-	return client.ContainerList(ctx, types.ContainerListOptions{
-		All: true,
-	})
-}
-
-
-
-func firstOrEmpty(sa []string) string {
-	if len(sa) < 1 {
-		return ""
+	var algorithm = fnv.New32a()
+	_, err := algorithm.Write([]byte(s))
+	if err != nil {
+		return 0, err
 	}
-	return sa[0]
+
+	return int32(algorithm.Sum32() % math.MaxInt32), nil
 }

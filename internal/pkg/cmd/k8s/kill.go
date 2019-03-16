@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pod
+package k8s
 
 import (
 	"fmt"
+	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strconv"
 )
 
-// psCmd represents the ps command
-var psCmd = &cobra.Command{
-	Use:   "ps",
+// killCmd represents the kill command
+var killCmd = &cobra.Command{
+	Use:   "kill",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -30,20 +33,43 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ps called")
+		client, err := getKubeClient()
+		if err != nil {
+			return
+		}
+
+		pods, err := client.CoreV1().Pods("").List(v1.ListOptions{})
+		if err != nil {
+			return
+		}
+
+		for _, pod := range pods.Items {
+			mappedName, err := hashing.MapStringToInt(string(pod.UID))
+			if err != nil {
+				return
+			}
+
+			if strconv.Itoa(int(mappedName)) == args[0] {
+				err := client.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &v1.DeleteOptions{})
+				if err != nil {
+					fmt.Println(err)
+				}
+				return
+			}
+		}
 	},
 }
 
 func init() {
-	podCmd.AddCommand(psCmd)
+	k8sCmd.AddCommand(killCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// psCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// killCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// psCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// killCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

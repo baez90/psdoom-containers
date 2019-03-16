@@ -30,6 +30,16 @@ ignored = ["github.com/Sirupsen/logrus"]
   go-tests = true
   unused-packages = true
 
+[[override]]
+  name = "k8s.io/apimachinery"
+  revision = "2b1284ed4c93a43499e781493253e2ac5959c4fd"
+  #version = "kubernetes-1.13.1"
+
+[[override]]
+  name = "k8s.io/client-go"
+  revision = "8d9ed539ba3134352c586810e749e58df4e94e4f"
+  #version = "kubernetes-1.13.1"
+
 [[constraint]]
   name = "github.com/docker/docker"
   revision = "d2ecc7bad104139c118249ad159b45315a022754"

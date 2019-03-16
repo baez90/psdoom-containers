@@ -12,18 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pod
+package k8s
 
 import (
 	"fmt"
-	"github.com/baez90/psdoom-containers/internal/pkg/cmd"
-
+	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/spf13/cobra"
+	v12 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"path/filepath"
+
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
 
-// podCmd represents the pod command
-var podCmd = &cobra.Command{
-	Use:   "pod",
+var kubeConfig *string
+
+// psCmd represents the ps command
+var psCmd = &cobra.Command{
+	Use:   "ps",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -32,20 +39,42 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("pod called")
+		client, err := getKubeClient()
+
+		if err != nil {
+			return
+		}
+
+		pods, err := client.CoreV1().Pods("").List(v1.ListOptions{})
+		if err != nil {
+			return
+		}
+
+		for _, pod := range pods.Items {
+			podNameHash, err := hashing.MapStringToInt(string(pod.UID))
+			if err != nil || pod.Status.Phase != v12.PodRunning {
+				continue
+			}
+			// format <user> <pid> <processname> <is_daemon=[1|0]>
+			fmt.Printf("%s %d %s 1\n", pod.Namespace, podNameHash, pod.Name)
+		}
 	},
 }
 
 func init() {
-	cmd.RootCmd.AddCommand(podCmd)
-
+	k8sCmd.AddCommand(psCmd)
+	if home := homeDir(); home != "" {
+		kubeConfig = psCmd.Flags().String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeConfig = psCmd.Flags().String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// podCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// psCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// podCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// psCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

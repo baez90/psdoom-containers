@@ -16,6 +16,7 @@ package docker
 
 import (
 	"fmt"
+	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/spf13/cobra"
 	"os/user"
 )
@@ -69,7 +70,7 @@ func printPsDoomCompatible(containerId, containerName string) {
 	if err != nil {
 		return
 	}
-	mappedConName, err := mapStringToInt(containerId)
+	mappedConName, err := hashing.MapStringToInt(containerId)
 	if err != nil {
 		return
 	}

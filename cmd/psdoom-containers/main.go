@@ -17,7 +17,7 @@ package main
 import (
 	"github.com/baez90/psdoom-containers/internal/pkg/cmd"
 	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/docker"
-	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/pod"
+	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/k8s"
 )
 
 func main() {
