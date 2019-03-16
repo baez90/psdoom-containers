@@ -12,14 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package docker
 
 import (
-	"github.com/baez90/psdoom-containers/internal/pkg/cmd"
-	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/docker"
-	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/pod"
+	"fmt"
+	"github.com/spf13/cobra"
+	"os"
 )
 
-func main() {
-	cmd.Execute()
+var setupCmd = &cobra.Command{
+	Use: "setup",
+	Short: "setup psdoom-ng to use Docker containers as monsters",
+	Long: `To use this setup command just run in a shell:
+	eval $(psdoom-containers docker setup)
+`,
+	Args: cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("PSDOOMPSCMD='%s docker ps'\n", os.Args[0])
+		fmt.Println("PSDOOMRENICECMD='true'")
+		fmt.Printf("PSDOOMKILLCMD='%s docker kill'\n", os.Args[0])
+	},
+}
+
+func init() {
+	dockerCmd.AddCommand(setupCmd)
 }
