@@ -65,10 +65,13 @@ func (ds *k8sDaemonServer) KillPod(ctx context.Context, podDel *k8sApi.PodDeleti
 		return &k8sApi.Empty{}, fmt.Errorf("no pod with given id %s/%s found", pod.Namespace, pod.Name)
 	}
 
-	err := ds.client.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &v1meta.DeleteOptions{})
-	if err != nil {
-		return &k8sApi.Empty{}, err
-	}
+	go func() {
+		// run the deletion asynchronous to ensure that client is not blocked
+		err := ds.client.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &v1meta.DeleteOptions{})
+		if err != nil {
+			logrus.Error("Error while deleting pod", err)
+		}
+	}()
 
 	return &k8sApi.Empty{}, nil
 }
