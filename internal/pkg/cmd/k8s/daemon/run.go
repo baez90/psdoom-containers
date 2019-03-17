@@ -18,12 +18,15 @@ import (
 	"fmt"
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s"
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s/generated"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
-	v12 "k8s.io/api/core/v1"
+	"google.golang.org/grpc/grpclog"
+	v1meta "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"net"
+	"os"
 )
 
 var runDaemonCmd = &cobra.Command{
@@ -42,12 +45,17 @@ var runDaemonCmd = &cobra.Command{
 			return
 		}
 
+		logger := logrus.New()
+		grpclog.SetLoggerV2(grpclog.NewLoggerV2WithVerbosity(logger.WriterLevel(logrus.InfoLevel), logger.WriterLevel(logrus.WarnLevel), logger.WriterLevel(logrus.ErrorLevel), 0))
+
 		server := grpc.NewServer()
 		k8sApi.RegisterK8SDaemonServer(server, k8s.NewK8sAPIServer(podRegistry))
 
 		err = server.Serve(lis)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error("Failed to start k8s-daemon", err)
+		} else {
+			logger.Info("Successfully started server...")
 		}
 	},
 }
@@ -60,12 +68,14 @@ func initRegistry(pr k8s.PodRegistry) {
 	client, err := k8s.GetKubeClient()
 
 	if err != nil {
-		panic(err)
+		logrus.Error("failed to get K8s client", err)
+		os.Exit(1)
 	}
 
 	pods, err := client.CoreV1().Pods("").List(v1.ListOptions{})
 	if err != nil {
-		return
+		logrus.Error("Failed to fetch pods", err)
+		os.Exit(1)
 	}
 
 	for _, pod := range pods.Items {
@@ -78,7 +88,8 @@ func watchPodEvents(pr k8s.PodRegistry) {
 	client, err := k8s.GetKubeClient()
 
 	if err != nil {
-		panic(err)
+		logrus.Error("Failed to get K8s client", err)
+		os.Exit(1)
 	}
 
 	watcher, err := client.CoreV1().Pods("").Watch(v1.ListOptions{
@@ -86,11 +97,12 @@ func watchPodEvents(pr k8s.PodRegistry) {
 		IncludeUninitialized: false,
 	})
 	if err != nil {
-		fmt.Println(err)
+		logrus.Error("failed to create watch for pods", err)
+		os.Exit(1)
 	}
 
 	for in := range watcher.ResultChan() {
-		pod, ok := in.Object.(*v12.Pod)
+		pod, ok := in.Object.(*v1meta.Pod)
 		if !ok {
 			continue
 		}

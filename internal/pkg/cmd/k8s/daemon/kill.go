@@ -16,8 +16,8 @@ package daemon
 
 import (
 	"context"
-	"fmt"
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s/generated"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"strconv"
@@ -33,6 +33,7 @@ var killDaemonCmd = &cobra.Command{
 
 		con, err := grpc.Dial("127.0.0.1:1357", grpc.WithInsecure())
 		if err != nil {
+			logrus.Error("failed connect to k8s daemon", err)
 			return
 		}
 		client := k8sApi.NewK8SDaemonClient(con)
@@ -41,7 +42,7 @@ var killDaemonCmd = &cobra.Command{
 		})
 
 		if err != nil {
-			fmt.Println(err)
+			logrus.Error("Error while sending kill command", err)
 		}
 	},
 }

@@ -15,9 +15,9 @@
 package k8s
 
 import (
-	"fmt"
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s"
 	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
@@ -36,24 +36,27 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := k8s.GetKubeClient()
 		if err != nil {
+			logrus.Error("Failed to get K8s client", err)
 			return
 		}
 
 		pods, err := client.CoreV1().Pods("").List(v1.ListOptions{})
 		if err != nil {
+			logrus.Error("Failed to get pods before deleting one", err)
 			return
 		}
 
 		for _, pod := range pods.Items {
 			mappedName, err := hashing.MapStringToInt(string(pod.UID))
 			if err != nil {
+				logrus.Error("Failed to map container UID to integer value", err)
 				return
 			}
 
 			if strconv.Itoa(int(mappedName)) == args[0] {
 				err := client.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &v1.DeleteOptions{})
 				if err != nil {
-					fmt.Println(err)
+					logrus.Error("Failed to kill k8s pod", err)
 				}
 				return
 			}
@@ -63,14 +66,4 @@ to quickly create a Cobra application.`,
 
 func init() {
 	k8sCmd.AddCommand(killCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// killCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// killCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

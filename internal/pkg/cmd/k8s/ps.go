@@ -19,7 +19,7 @@ import (
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s"
 	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/spf13/cobra"
-	v12 "k8s.io/api/core/v1"
+	v1meta "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"path/filepath"
 
@@ -51,7 +51,7 @@ to quickly create a Cobra application.`,
 
 		for _, pod := range pods.Items {
 			podNameHash, err := hashing.MapStringToInt(string(pod.UID))
-			if err != nil || pod.Status.Phase != v12.PodRunning {
+			if err != nil || pod.Status.Phase != v1meta.PodRunning {
 				continue
 			}
 			// format <user> <pid> <processname> <is_daemon=[1|0]>
@@ -67,13 +67,4 @@ func init() {
 	} else {
 		k8s.KubeConfigPathFlag = psCmd.Flags().String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// psCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// psCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

@@ -15,9 +15,9 @@
 package daemon
 
 import (
-	"fmt"
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s"
 	"github.com/baez90/psdoom-containers/internal/pkg/cmd"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -28,7 +28,7 @@ var k8sDaemonCmd = &cobra.Command{
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Do not use this command directly but one of its sub-commands")
+		logrus.Error("Do not use this command directly but one of its sub-commands")
 		os.Exit(1)
 	},
 }

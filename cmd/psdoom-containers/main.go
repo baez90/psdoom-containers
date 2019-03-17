@@ -19,8 +19,14 @@ import (
 	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/docker"
 	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/k8s"
 	_ "github.com/baez90/psdoom-containers/internal/pkg/cmd/k8s/daemon"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: false,
+	})
+
 	cmd.Execute()
 }

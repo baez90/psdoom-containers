@@ -18,8 +18,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s/generated"
+	"github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
-	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"strconv"
 )
@@ -42,6 +43,7 @@ type k8sDaemonServer struct {
 }
 
 func (ds *k8sDaemonServer) GetPods(context.Context, *k8sApi.Empty) (*k8sApi.Pods, error) {
+	logrus.Info("Processing GetPods() request...")
 	pods := make([]*k8sApi.Pod, 0)
 	ds.podRegistry.ForEach(func(key string, pod v1.Pod) {
 		pods = append(pods, &k8sApi.Pod{
@@ -57,12 +59,13 @@ func (ds *k8sDaemonServer) GetPods(context.Context, *k8sApi.Empty) (*k8sApi.Pods
 }
 
 func (ds *k8sDaemonServer) KillPod(ctx context.Context, podDel *k8sApi.PodDeletion) (*k8sApi.Empty, error) {
+	logrus.Infof("Processing KillPod() request for ID %s", podDel.PodId)
 	pod, exists := ds.podRegistry.GetPod(strconv.Itoa(int(podDel.PodId)))
 	if !exists {
 		return &k8sApi.Empty{}, fmt.Errorf("no pod with given id %s/%s found", pod.Namespace, pod.Name)
 	}
 
-	err := ds.client.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &v12.DeleteOptions{})
+	err := ds.client.CoreV1().Pods(pod.Namespace).Delete(pod.Name, &v1meta.DeleteOptions{})
 	if err != nil {
 		return &k8sApi.Empty{}, err
 	}
