@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.github.baez90.psdoom-containers.k8s.api";
+option java_outer_classname = "K8sApi";
+
+package k8sApi;
+
+service K8sDaemon {
+    rpc GetPods(Empty) returns (Pods) {}
+    rpc KillPod(PodDeletion) returns (Empty) {}
+}
+
+// empty message as a replacement for void methods
+message Empty {}
+
+// pod result reduced to a minimum of fields
+message Pod {
+    string id = 1;
+    string name = 2;
+    string namespace = 3;
+}
+
+// pod array result wrapper
+message Pods {
+    repeated Pod pods = 4;
+}
+
+// deletion message only including the masked pod id
+message PodDeletion {
+    int32 podId = 5;
+}
+

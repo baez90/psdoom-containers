@@ -21,19 +21,21 @@ import (
 	"os"
 )
 
-func homeDir() string {
+var KubeConfigPathFlag *string
+
+func HomeDir() string {
 	if h := os.Getenv("HOME"); h != "" {
 		return h
 	}
 	return os.Getenv("USERPROFILE") // windows
 }
 
-func getKubeConfig() (*rest.Config, error) {
-	return clientcmd.BuildConfigFromFlags("", *kubeConfig)
+func GetKubeConfig() (*rest.Config, error) {
+	return clientcmd.BuildConfigFromFlags("", *KubeConfigPathFlag)
 }
 
-func getKubeClient() (*kubernetes.Clientset, error) {
-	cfg, err := getKubeConfig()
+func GetKubeClient() (*kubernetes.Clientset, error) {
+	cfg, err := GetKubeConfig()
 	if err != nil {
 		return nil, err
 	}

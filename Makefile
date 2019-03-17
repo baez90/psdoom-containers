@@ -25,6 +25,10 @@ install:
 format:
 	@go fmt $(PKGS)
 
+generate:
+	@mkdir -p $(DIR)/internal/pkg/api/k8s/generated
+	@protoc -I ./api/ ./api/k8s-daemon.proto --go_out=plugins:./internal/pkg/api/k8s/generated
+
 revive: ensure-revive
 	@revive --config $(DIR)assets/lint/config.toml -exclude $(DIR)vendor/... -formatter friendly $(DIR)...
 

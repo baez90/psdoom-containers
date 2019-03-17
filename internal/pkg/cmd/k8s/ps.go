@@ -16,6 +16,7 @@ package k8s
 
 import (
 	"fmt"
+	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s"
 	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/spf13/cobra"
 	v12 "k8s.io/api/core/v1"
@@ -25,8 +26,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
-
-var kubeConfig *string
 
 // psCmd represents the ps command
 var psCmd = &cobra.Command{
@@ -39,7 +38,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := getKubeClient()
+		client, err := k8s.GetKubeClient()
 
 		if err != nil {
 			return
@@ -63,10 +62,10 @@ to quickly create a Cobra application.`,
 
 func init() {
 	k8sCmd.AddCommand(psCmd)
-	if home := homeDir(); home != "" {
-		kubeConfig = psCmd.Flags().String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	if home := k8s.HomeDir(); home != "" {
+		k8s.KubeConfigPathFlag = psCmd.Flags().String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
-		kubeConfig = psCmd.Flags().String("kubeconfig", "", "absolute path to the kubeconfig file")
+		k8s.KubeConfigPathFlag = psCmd.Flags().String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
 	// Here you will define your flags and configuration settings.
 

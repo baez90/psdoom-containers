@@ -16,6 +16,7 @@ package k8s
 
 import (
 	"fmt"
+	"github.com/baez90/psdoom-containers/internal/pkg/api/k8s"
 	"github.com/baez90/psdoom-containers/internal/pkg/hashing"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := getKubeClient()
+		client, err := k8s.GetKubeClient()
 		if err != nil {
 			return
 		}
